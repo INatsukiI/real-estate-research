@@ -12,7 +12,6 @@ export class Environments {
   }
 
   static initialize(env: Env): void {
-    // 必須の環境変数をチェック
     const variables = env as EnvironmentVariables;
     Environments.instance = new Environments(variables);
   }
