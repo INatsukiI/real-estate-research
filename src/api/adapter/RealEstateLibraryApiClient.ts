@@ -14,6 +14,8 @@ export interface Municipality {
  * 不動産情報ライブラリAPIクライアント
  */
 export class RealEstateLibraryApiClient {
+  private readonly baseUrl = process.env.REAL_ESTATE_BASE_URL;
+  private readonly apiKey = process.env.REAL_ESTATE_API_KEY;
   /**
    * 都道府県内市区町村一覧を取得
    */
@@ -31,14 +33,11 @@ export class RealEstateLibraryApiClient {
     });
 
     try {
-      const response = await fetch(
-        `${process.env.REAL_ESTATE_BASE_URL}/XIT002?${queryParams}`,
-        {
-          headers: {
-            "Ocp-Apim-Subscription-Key": process.env.REAL_ESTATE_API_KEY ?? "",
-          },
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/XIT002?${queryParams}`, {
+        headers: {
+          "Ocp-Apim-Subscription-Key": `${this.apiKey}`,
+        },
+      });
 
       if (!response.ok) {
         switch (response.status) {
