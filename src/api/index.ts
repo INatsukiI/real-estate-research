@@ -1,27 +1,23 @@
-import { Env, Hono } from "hono";
+import { Hono } from "hono";
 import { logger } from "hono/logger";
 import routes from "./router";
-import { env } from "hono/adapter";
-import { Environments } from "./config/Environments";
+import { DIContainer } from "./config/di-container";
+import { DependencyTypes, diContainer } from "./config/di-config";
 
-let isInitialized = false;
+export type HonoVariables = {
+  Variables: {
+    diContainer: DIContainer<DependencyTypes>;
+  };
+};
 
-const app = new Hono({
+const app = new Hono<HonoVariables>({
   strict: false,
 })
   .use("*", async (c, next) => {
     try {
-      // 初期化が済んでいない場合のみ実行
-      if (!isInitialized) {
-        const variables = env<Env>(c);
-        if (!variables) {
-          throw new Error("Environment variables are not set");
-        }
-        Environments.initialize(variables);
-        isInitialized = true;
-      }
+      c.set("diContainer", diContainer);
     } catch (error) {
-      console.error("Failed to initialize environment:", error);
+      console.error("Failed to initialize:", error);
       return c.json({ error: "Internal Server Error" }, 500);
     }
     await next();
