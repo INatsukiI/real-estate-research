@@ -1,10 +1,27 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import routes from "./router";
+import { DIContainer } from "./config/di-container";
+import { DependencyTypes, diContainer } from "./config/di-config";
 
-const app = new Hono({
-  strict: false, // 最後の/を区別しない @see https://hono.dev/docs/api/hono#strict-mode
+export type HonoVariables = {
+  Variables: {
+    diContainer: DIContainer<DependencyTypes>;
+  };
+};
+
+const app = new Hono<HonoVariables>({
+  strict: false,
 })
+  .use("*", async (c, next) => {
+    try {
+      c.set("diContainer", diContainer);
+    } catch (error) {
+      console.error("Failed to initialize:", error);
+      return c.json({ error: "Internal Server Error" }, 500);
+    }
+    await next();
+  })
   .basePath("/api")
   .use(logger())
   .route("/", routes)
